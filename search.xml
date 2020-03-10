@@ -3,7 +3,9 @@
   <entry>
     <title>JDBC</title>
     <url>/2020/03/01/JDBC/</url>
-    <content><![CDATA[<h1 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h1><h2 id="1-1获取连接"><a href="#1-1获取连接" class="headerlink" title="1.1获取连接"></a>1.1获取连接</h2><ul>
+    <content><![CDATA[<h3 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h3><a id="more"></a>
+
+<h1 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h1><h2 id="1-1获取连接"><a href="#1-1获取连接" class="headerlink" title="1.1获取连接"></a>1.1获取连接</h2><ul>
 <li>数据库url:     ==url=“ jdbc:mysql://localhost:3306/数据库名 ”==</li>
 <li>配置信息<ul>
 <li>用户名：</li>
@@ -12,8 +14,6 @@
 </li>
 <li>驱动</li>
 </ul>
-<a id="more"></a>
-
 <h3 id="1-1-1-配置文件获取连接"><a href="#1-1-1-配置文件获取连接" class="headerlink" title="1.1.1 配置文件获取连接"></a>1.1.1 配置文件获取连接</h3><figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">url</span>=<span class="string">jdbc:mysql://localhost/testjdbc?serverTimezone=UTC</span></span><br><span class="line"><span class="attr">username</span>=<span class="string">root</span></span><br><span class="line"><span class="attr">password</span>=<span class="string">admin</span></span><br><span class="line"><span class="attr">driverClassName</span>=<span class="string">com.mysql.cj.jdbc.Driver</span></span><br></pre></td></tr></table></figure>
 
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Connection <span class="title">getConnection1</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//1.读取配置文件中的四个基本信息</span></span><br><span class="line">        InputStream is = GetConnection1.class.getClassLoader().getResourceAsStream("配置文件路径");</span><br><span class="line">        Properties pros =<span class="keyword">new</span> Properties();</span><br><span class="line">        pros.load(is);</span><br><span class="line">        String user = pros.getProperty(<span class="string">"user"</span>);</span><br><span class="line">        String password = pros.getProperty(<span class="string">"password"</span>);</span><br><span class="line">        String url = pros.getProperty(<span class="string">"url"</span>);</span><br><span class="line">        String driverClass = pros.getProperty(<span class="string">"driverClass"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//2.加载驱动</span></span><br><span class="line">        Class.forName(driverClass);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//3.获取连接</span></span><br><span class="line">        Connection conn = DriverManager.getConnection(url,user,password);</span><br><span class="line">    	<span class="keyword">return</span> conn;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
