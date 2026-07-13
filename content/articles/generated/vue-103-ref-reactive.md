@@ -1,0 +1,20 @@
+---
+title: "ref和reactive的区别"
+date: 2026-07-08
+category: "Vue"
+tags: ["Vue"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 1849
+---
+
+| **特性**     | **ref**                                                      | **reactive**                                  |
+| ------------ | ------------------------------------------------------------ | --------------------------------------------- |
+| **适用类型** | **所有类型**（基本类型 + 引用类型）。                        | **仅限引用类型**（Object, Array, Map, Set）。 |
+| **访问方式** | 脚本中需使用 `.value`，模板中自动解包 。                     | 直接访问属性，无需 `.value` 。                |
+| **底层实现** | 对基本类型使用 `Object.defineProperty` 的 get/set；对引用类型底层调用 `reactive`。 | 基于 ES6 **Proxy** 实现代理 。                |
+| **重新赋值** | 直接修改 `.value` 依然保持响应式。                           | **重新赋值整个对象会丢失响应式**。            |
+| **解构支持** | 不支持直接解构（解构后丢失响应式），需配合 `toRefs`。        | 不支持直接解构，需配合 `toRefs`。             |

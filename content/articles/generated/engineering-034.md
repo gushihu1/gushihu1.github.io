@@ -1,0 +1,23 @@
+---
+title: "项目样式管理"
+date: 2026-07-08
+category: "项目搭建"
+tags: ["项目搭建"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 571
+---
+
+1. 建立视觉体系
+   1. **基础原子变量 (variables.scss)**：定义品牌色、辅助色、字体大小阶梯、间距（Padding/Margin）标准、圆角等
+   2. **语义化变量**：不要直接在组件里写 `$color-blue`，而是写 `$btn-primary-bg`。这样在进行“换肤”或主题调整时，只需修改变量映射
+2. 样式隔离与命名策略
+   1. 默认使用 `<style scoped>`，它通过 `data-v-hash` 属性实现局部隔离。
+   2. 内部命名仍建议遵循 `BEM` 命名法，防止在深度选择器（如 `:deep()`）或全局覆盖时发生冲突
+3. 公共样式统一放在styles文件夹，并留有总入口
+   1. 不同的功能分类在不同的文件
+   2. 引入初始化样式
+   3. 提供一些便捷工具样式，如省略号，浮动清除等

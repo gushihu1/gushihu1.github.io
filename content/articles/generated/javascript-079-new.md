@@ -1,0 +1,19 @@
+---
+title: "new"
+date: 2026-07-08
+category: "JS"
+tags: ["JS"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 1380
+---
+
+1. **创建新对象**：在内存中创建一个全新的空对象 `{}`。
+2. **联结原型链**：将这个新对象的隐式原型 `__proto__` 指向构造函数的 `prototype` 属性。这一步是实例能够访问原型方法（如 `BaseChart.render`）的关键。
+3. **绑定 this 并执行**：调用构造函数，将其中的 `this` 指向刚才创建的空对象，并执行构造函数内部的代码（为对象添加属性）。
+4. **返回结果**：
+   - 如果构造函数显式返回了一个**对象**，则 `new` 的结果就是这个对象。
+   - 如果构造函数返回的是基本类型（如字符串、数字）或者没有返回值，则默认返回第一步创建的那个新对象。

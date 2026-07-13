@@ -1,0 +1,17 @@
+---
+title: "原型链"
+date: 2026-07-08
+category: "JS"
+tags: ["JS"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 1369
+---
+
+1. **`prototype`**：**显式原型**。存在于函数（Function）上，定义了构造函数创建的实例共享的属性和方法。
+2. **`__proto__`**：**隐式原型**。存在于每个对象上，指向创建该对象的构造函数的 `prototype`。
+3. **`constructor`**：存在于 `prototype` 上，指向关联的构造函数。
+4. **原型链的本质**：当访问一个对象的属性时，如果自身没有，就会沿着 `__proto__` 这条线向上查找，直到 `Object.prototype.__proto__`（即 `null`）为止。

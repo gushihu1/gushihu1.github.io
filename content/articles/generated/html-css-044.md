@@ -1,0 +1,28 @@
+---
+title: "响应式布局"
+date: 2026-07-08
+category: "HTML和CSS"
+tags: ["HTML和CSS"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 797
+---
+
+1. ```html
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   ```
+
+2. 媒体查询
+
+   1. 大厂标准的 CSS 规范普遍推崇**从“小屏幕”向“大屏幕”渐进增强**。因为移动端结构通常最精简，样式开销小。
+
+3. Flex / Grid 布局
+
+4. 相对单位矩阵
+
+5. 颠覆性前沿特性：容器查询（Container Queries）
+
+   1. @container

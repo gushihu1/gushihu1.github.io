@@ -1,0 +1,24 @@
+---
+title: "大屏如何适配不同尺寸的屏幕"
+date: 2026-07-08
+category: "大屏项目功能"
+tags: ["大屏项目功能"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 361
+---
+
+1. 常用的方法有Rem，vw/vh的方法
+   1. 还可以通过配合`postcss-pxtorem`使用
+
+2. 还有一种是使用缩放的形式，但是这种会导致一些问题，如变形，留白，还有一些定位元素定位不准确的问题
+3. 我们使用的是Rem方法
+   1. 通过 JavaScript 监听浏览器窗口的变化，根据当前窗口宽度与设计稿宽度的比例，实时计算并设置根元素的 `font-size`
+   2. 对于echarts和一些需要传入px单位的内容，编写一个通用的 `resizing` 工具函数，根据当前屏幕宽度手动计算对应的 px 值。
+   3. 对于组件库可以通过设置CSS变量的方法进行控制
+   4. 浏览器对字体最小的限制，UI尽量不使用小字，对于需要的小字可以使用缩放解决
+   5. 使用`postcss-pxtorem`对于动态属性和内联属性需要额外的处理
+

@@ -1,0 +1,18 @@
+---
+title: "call，bind，apply"
+date: 2026-07-08
+category: "JS"
+tags: ["JS"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 1199
+---
+
+| **特性**      | **call**                    | **apply**                        | **bind**             |
+| ------------- | --------------------------- | -------------------------------- | -------------------- |
+| **立即执行**  | 是                          | 是                               | **否（返回新函数）** |
+| **参数格式**  | 参数列表 `(obj, p1, p2...)` | 数组/类数组 `(obj, [p1, p2...])` | 参数列表或分两次传参 |
+| **this 指向** | 临时改变                    | 临时改变                         | **永久绑定**         |

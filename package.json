@@ -1,0 +1,38 @@
+{
+  "name": "liumengtao-tech-blog",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "dev": "nuxt dev --host 0.0.0.0",
+    "build": "nuxt build",
+    "format": "prettier --write .",
+    "generate": "nuxt generate",
+    "knowledge:import": "node scripts/import-knowledge.mjs",
+    "knowledge:check": "node scripts/import-knowledge.mjs --check",
+    "knowledge:help": "node scripts/import-knowledge.mjs --help",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "latest",
+    "@nuxt/content": "latest",
+    "@nuxt/ui": "latest",
+    "@tsparticles/slim": "latest",
+    "@tsparticles/vue3": "latest",
+    "@vueuse/nuxt": "latest",
+    "echarts": "latest",
+    "motion-v": "latest",
+    "nuxt": "^4.4.8",
+    "vue": "^3.5.26",
+    "vue-echarts": "latest",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.1.8"
+  }
+}

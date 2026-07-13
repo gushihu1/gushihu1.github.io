@@ -1,0 +1,16 @@
+---
+title: "对现有公共组件进行二次封装"
+date: 2026-07-08
+category: "项目搭建"
+tags: ["项目搭建"]
+featured: false
+draft: false
+readingTime: "1 min"
+sourceId: "frontend"
+sourceFile: "面试2026.md"
+sourceLine: 522
+---
+
+1. 属性和事件的透传，通过$attrs获取，直接v-bind
+2. 插槽，通过$slots获取
+3. 组件的方法暴露出去
