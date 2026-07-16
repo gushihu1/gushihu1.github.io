@@ -1,4 +1,5 @@
-export type MainPagePersistenceKey = "home" | "projects" | "articles" | "about";
+export type MainPagePersistenceKey =
+  "home" | "projects" | "showcase" | "articles" | "about";
 
 export const useMainPagePersistence = (key: MainPagePersistenceKey) => {
   const positions = useState<Record<MainPagePersistenceKey, number>>(
@@ -6,6 +7,7 @@ export const useMainPagePersistence = (key: MainPagePersistenceKey) => {
     () => ({
       home: 0,
       projects: 0,
+      showcase: 0,
       articles: 0,
       about: 0,
     }),

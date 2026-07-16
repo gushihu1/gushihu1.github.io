@@ -12,14 +12,25 @@ useSeoMeta({ title: "关于我", description: profile.summary });
       <div class="about-avatar glass">
         <div class="avatar-core">
           <span>{{ profile.initials }}</span
-          ><small>FRONTEND<br />ENGINEER</small>
+          ><small>TECH<br />BUILDER</small>
         </div>
       </div>
       <div>
         <span class="eyebrow"><span /> ABOUT ME</span>
         <h1>你好，我是{{ profile.name }}</h1>
         <p>{{ profile.summary }}</p>
-        <CopyEmailButton :email="profile.email" />
+        <div class="contact-actions">
+          <CopyContactButton
+            label="邮箱"
+            :value="profile.email"
+            icon="i-lucide-mail"
+          />
+          <CopyContactButton
+            label="手机号"
+            :value="profile.phone"
+            icon="i-lucide-phone"
+          />
+        </div>
       </div>
     </section>
     <section class="about-grid">

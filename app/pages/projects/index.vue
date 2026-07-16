@@ -7,7 +7,9 @@ useSeoMeta({
   description: "刘梦涛参与的后台、跨端应用与数据可视化项目。",
 });
 const { data: projects } = await useAsyncData("all-projects", () =>
-  queryCollection("projects").order("date", "DESC").all(),
+  withContentQueryRetry(() =>
+    queryCollection("projects").order("date", "DESC").all(),
+  ),
 );
 </script>
 <template>

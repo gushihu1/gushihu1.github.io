@@ -6,179 +6,206 @@ definePageMeta({ scrollToTop: false });
 useMainPagePersistence("home");
 
 const { active } = useEffects();
-const { data: projects } = await useAsyncData("featured-projects", () =>
-  queryCollection("projects").where("featured", "=", true).limit(3).all(),
+const { data: articleData } = await useAsyncData("home-articles", () =>
+  withContentQueryRetry(() =>
+    queryCollection("articles")
+      .where("draft", "=", false)
+      .order("date", "DESC")
+      .all(),
+  ),
 );
-const { data: articles } = await useAsyncData("latest-articles", () =>
-  queryCollection("articles")
-    .where("draft", "=", false)
-    .order("path", "ASC")
-    .limit(3)
-    .all(),
+const { data: projects } = await useAsyncData("home-projects", () =>
+  withContentQueryRetry(() =>
+    queryCollection("projects").order("date", "DESC").limit(2).all(),
+  ),
 );
-const roles = [
-  "Vue 前端开发",
-  "UNI-APP 跨端开发",
-  "echarts 图表开发",
-  "前端项目搭建",
-];
-const roleIndex = useState("home-role-index", () => 0);
-let timer: ReturnType<typeof setInterval> | undefined;
 
-const startRoleTimer = () => {
-  if (timer) return;
-  timer = setInterval(
-    () => (roleIndex.value = (roleIndex.value + 1) % roles.length),
-    2600,
-  );
-};
+const sortedArticles = computed(() =>
+  sortArticlesByDate(articleData.value || []),
+);
+const featuredArticle = computed(
+  () =>
+    sortedArticles.value.find((article) => article.featured) ||
+    sortedArticles.value[0],
+);
+const latestArticles = computed(() =>
+  sortedArticles.value
+    .filter((article) => article.stem !== featuredArticle.value?.stem)
+    .slice(0, 5),
+);
+const allCategoryCounts = computed(() => {
+  const counts = new Map<string, number>();
+  for (const article of sortedArticles.value) {
+    counts.set(article.category, (counts.get(article.category) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort(
+      (left, right) =>
+        right.count - left.count ||
+        left.name.localeCompare(right.name, "zh-CN"),
+    );
+});
+const categoryCounts = computed(() => allCategoryCounts.value.slice(0, 10));
 
-const stopRoleTimer = () => {
-  clearInterval(timer);
-  timer = undefined;
-};
-
-onMounted(startRoleTimer);
-onActivated(startRoleTimer);
-onDeactivated(stopRoleTimer);
-onBeforeUnmount(stopRoleTimer);
+const topicSummary = ["软件开发", "AI 探索", "工程实践"];
 </script>
 
 <template>
   <div>
-    <section class="hero section-shell">
+    <section class="blog-hero section-shell">
       <ClientOnly><ParticleField /></ClientOnly>
-      <div class="hero-grid" />
+      <div class="blog-hero__grid" />
       <div class="scanline" />
+
       <motion.div
-        class="hero-copy"
-        :initial="active ? { opacity: 0, y: 30 } : false"
+        class="blog-hero__copy"
+        :initial="active ? { opacity: 0, y: 24 } : false"
         :animate="{ opacity: 1, y: 0 }"
-        :transition="{ duration: 0.8 }"
+        :transition="{ duration: 0.7 }"
       >
-        <div class="availability"><span /> AVAILABLE FOR GREAT IDEAS</div>
-        <p class="hero-kicker">HELLO, I'M {{ profile.name }}</p>
-        <h1>把复杂系统<br /><span>变成流畅体验。</span></h1>
-        <div class="role-switcher">
-          <UIcon name="i-lucide-terminal" /><Transition
-            name="role"
-            mode="out-in"
-            ><strong :key="roleIndex">{{
-              roles[roleIndex]
-            }}</strong></Transition
-          >
+        <span class="eyebrow"><span /> TECHNOLOGY FIELD NOTES</span>
+        <h1>刘梦涛的<br /><span>技术成长笔记</span></h1>
+        <p class="blog-hero__summary">
+          记录软件开发、AI
+          与工程实践，也沉淀那些真正影响系统质量、开发效率和长期维护的思考。
+        </p>
+        <div class="blog-hero__topics" aria-label="主要写作方向">
+          <span v-for="topic in topicSummary" :key="topic">{{ topic }}</span>
         </div>
-        <p class="hero-summary">{{ profile.summary }}</p>
-        <div class="hero-actions">
-          <NuxtLink to="/projects" class="button primary"
-            >探索我的作品 <UIcon name="i-lucide-arrow-up-right"
-          /></NuxtLink>
-          <NuxtLink to="/about" class="button secondary">了解更多</NuxtLink>
+        <div class="blog-hero__actions">
+          <NuxtLink to="/articles" class="button primary">
+            浏览全部文章 <UIcon name="i-lucide-arrow-right" />
+          </NuxtLink>
+          <a href="#latest-notes" class="button secondary">查看精选文章</a>
         </div>
-      </motion.div>
-      <motion.div
-        class="hero-orbit"
-        :initial="active ? { opacity: 0, scale: 0.85 } : false"
-        :animate="{ opacity: 1, scale: 1 }"
-        :transition="{ duration: 1, delay: 0.2 }"
-      >
-        <div class="orbit-ring ring-1" />
-        <div class="orbit-ring ring-2" />
-        <div class="orbit-ring ring-3" />
-        <div class="avatar-core">
-          <span>{{ profile.initials }}</span
-          ><small>FRONTEND<br />ENGINEER</small>
-        </div>
-        <span
-          v-for="(item, i) in ['Vue', 'UNI-APP', 'echarts', 'ES6+']"
-          :key="item"
-          class="orbit-node"
-          :class="`node-${i + 1}`"
-          >{{ item }}</span
-        >
-      </motion.div>
-      <div class="scroll-hint">
-        <span>SCROLL TO EXPLORE</span>
-        <div />
-      </div>
-    </section>
-
-    <section class="ticker">
-      <div>
-        <span v-for="i in 2" :key="i"
-          ><b v-for="tech in profile.stack" :key="`${i}-${tech}`"
-            >{{ tech }} <i>✦</i></b
-          ></span
-        >
-      </div>
-    </section>
-
-    <section class="section-shell content-section">
-      <Reveal
-        ><SectionTitle
-          eyebrow="SELECTED WORK"
-          title="从业务难题，到可复用方案"
-          description="不止完成页面，更关注系统如何演进、能力如何沉淀。"
-      /></Reveal>
-      <div class="project-grid">
-        <Reveal
-          v-for="(project, i) in projects"
-          :key="project.path"
-          :delay="i * 0.08"
-          ><ProjectCard :project="project" :index="i"
-        /></Reveal>
-      </div>
-      <NuxtLink to="/projects" class="text-link"
-        >查看全部项目 <UIcon name="i-lucide-arrow-right"
-      /></NuxtLink>
-    </section>
-
-    <section class="section-shell content-section capability-section">
-      <Reveal
-        ><div class="capability-copy">
-          <SectionTitle eyebrow="PROFESSIONAL SKILLS" title="专业技能" />
-          <p>能力内容来自个人简历，不使用主观评分。</p>
-          <div class="skill-chips">
-            <span v-for="tech in profile.stack" :key="tech">{{ tech }}</span>
+        <div class="blog-hero__stats">
+          <div>
+            <strong>{{ sortedArticles.length }}</strong
+            ><span>篇技术笔记</span>
           </div>
-        </div></Reveal
+          <div>
+            <strong>{{ allCategoryCounts.length }}</strong
+            ><span>个写作方向</span>
+          </div>
+          <div>
+            <strong>{{ projects?.length || 0 }}</strong
+            ><span>项精选实践</span>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        v-if="featuredArticle"
+        class="blog-hero__featured"
+        :initial="active ? { opacity: 0, x: 24 } : false"
+        :animate="{ opacity: 1, x: 0 }"
+        :transition="{ duration: 0.75, delay: 0.1 }"
       >
-      <Reveal :delay="0.12"
-        ><div class="ability-panel glass">
-          <ol class="ability-list">
-            <li v-for="(ability, i) in profile.abilities" :key="ability">
-              <span>{{ String(i + 1).padStart(2, "0") }}</span>
-              <p>{{ ability }}</p>
-            </li>
-          </ol>
-        </div></Reveal
-      >
+        <ArticleCard :article="featuredArticle" variant="featured" />
+      </motion.div>
     </section>
 
-    <section class="section-shell content-section">
-      <Reveal
-        ><SectionTitle
-          eyebrow="FIELD NOTES"
-          title="来自一线项目的技术笔记"
-          description="记录那些真正影响稳定性、性能与开发体验的决策。"
-      /></Reveal>
-      <div class="article-grid">
+    <section
+      id="latest-notes"
+      class="section-shell content-section blog-section"
+    >
+      <Reveal>
+        <div class="section-heading-row">
+          <SectionTitle
+            eyebrow="LATEST NOTES"
+            title="文章精选"
+            description="汇集软件开发、AI 探索与工程实践中的技术思考。"
+          />
+          <NuxtLink to="/articles" class="text-link">
+            查看文章归档 <UIcon name="i-lucide-arrow-right" />
+          </NuxtLink>
+        </div>
+      </Reveal>
+      <div class="editorial-list">
         <Reveal
-          v-for="(article, i) in articles"
-          :key="article.path"
-          :delay="i * 0.07"
-          ><ArticleCard :article="article"
-        /></Reveal>
+          v-for="(article, index) in latestArticles"
+          :key="article.stem"
+          :delay="index * 0.04"
+        >
+          <ArticleCard :article="article" variant="list" />
+        </Reveal>
       </div>
     </section>
 
-    <section class="section-shell contact-banner glass">
-      <div>
-        <span class="eyebrow"><span /> LET'S CONNECT</span>
-        <h2>有值得一起解决的问题？</h2>
-        <p>欢迎交流 Vue、跨端、数据可视化，以及如何让 AI 真正进入开发流程。</p>
+    <section class="section-shell content-section blog-section">
+      <Reveal>
+        <SectionTitle
+          eyebrow="EXPLORE TOPICS"
+          title="按主题阅读"
+          description="从高频主题进入，快速找到同一技术方向的笔记。"
+        />
+      </Reveal>
+      <div class="topic-grid">
+        <Reveal
+          v-for="(topic, index) in categoryCounts"
+          :key="topic.name"
+          :delay="index * 0.025"
+        >
+          <NuxtLink
+            :to="{ path: '/articles', query: { category: topic.name } }"
+            class="topic-card"
+          >
+            <span>{{ topic.name }}</span>
+            <strong>{{ topic.count }}</strong>
+            <UIcon name="i-lucide-arrow-up-right" />
+          </NuxtLink>
+        </Reveal>
       </div>
-      <CopyEmailButton :email="profile.email" />
+    </section>
+
+    <section class="section-shell content-section blog-section">
+      <Reveal>
+        <div class="section-heading-row">
+          <SectionTitle
+            eyebrow="PROJECT PRACTICE"
+            title="项目实践"
+            description="从真实业务中沉淀出来的解决方案与经验。"
+          />
+          <NuxtLink to="/projects" class="text-link">
+            查看全部项目 <UIcon name="i-lucide-arrow-right" />
+          </NuxtLink>
+        </div>
+      </Reveal>
+      <div class="project-grid blog-projects">
+        <Reveal
+          v-for="(project, index) in projects"
+          :key="project.path"
+          :delay="index * 0.07"
+        >
+          <ProjectCard :project="project" :index="index" />
+        </Reveal>
+      </div>
+    </section>
+
+    <section class="section-shell author-card">
+      <div class="author-card__identity">
+        <span class="brand-mark">{{ profile.initials }}</span>
+        <div>
+          <span class="eyebrow"><span /> ABOUT THE AUTHOR</span>
+          <h2>{{ profile.name }}</h2>
+          <p>{{ profile.role }} · {{ profile.location }}</p>
+        </div>
+      </div>
+      <p class="author-card__summary">{{ profile.summary }}</p>
+      <div class="author-card__actions">
+        <NuxtLink to="/about" class="button secondary">了解作者</NuxtLink>
+        <CopyContactButton
+          label="邮箱"
+          :value="profile.email"
+          icon="i-lucide-mail"
+        />
+        <CopyContactButton
+          label="手机号"
+          :value="profile.phone"
+          icon="i-lucide-phone"
+        />
+      </div>
     </section>
   </div>
 </template>

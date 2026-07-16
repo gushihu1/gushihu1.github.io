@@ -1,11 +1,12 @@
 export const profile = {
   name: "刘梦涛",
   initials: "LMT",
-  role: "前端开发工程师",
+  role: "技术开发者",
   email: "1525235338@qq.com",
+  phone: "13966573218",
   location: "中国 · 杭州",
   summary:
-    "熟练使用Vue生态开发，Vue2、Vue3均能熟练使用；熟练使用UNI-APP，能适配不同端的开发工作；熟练使用echarts处理图表展示；从0开始搭建项目，完成功能的封装，如请求，路由权限等功能。",
+    "以 Vue 与跨端开发为主要实践基础，持续拓展后端、AI 与工程化方向；记录真实项目中的技术选择、问题分析和解决过程。",
   education: {
     school: "安徽建筑大学",
     degree: "一本 · 本科 · 网络工程",

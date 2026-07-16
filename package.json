@@ -6,13 +6,14 @@
     "node": ">=22.5.0"
   },
   "scripts": {
-    "dev": "nuxt dev --host 0.0.0.0",
+    "dev": "nuxt dev --host",
     "build": "nuxt build",
     "format": "prettier --write .",
     "generate": "nuxt generate",
     "knowledge:import": "node scripts/import-knowledge.mjs",
     "knowledge:check": "node scripts/import-knowledge.mjs --check",
     "knowledge:help": "node scripts/import-knowledge.mjs --help",
+    "test:knowledge": "node scripts/knowledge-import-core.test.mjs",
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck"
   },
@@ -26,6 +27,8 @@
     "echarts": "latest",
     "motion-v": "latest",
     "nuxt": "^4.4.8",
+    "remark-mark-highlight": "^0.1.1",
+    "remark-supersub": "^1.0.0",
     "vue": "^3.5.26",
     "vue-echarts": "latest",
     "vue-router": "^5.1.0"

@@ -1,0 +1,163 @@
+/* Markdown reading theme. Load this file after main.css to replace the theme. */
+.prose {
+  border-radius: 24px;
+  padding: clamp(26px, 6vw, 58px);
+  font-size: 1.06rem;
+  color: #c8cede;
+  line-height: 1.85;
+  background: rgba(255, 255, 255, 0.026);
+}
+
+.prose h2,
+.prose h3 {
+  color: #fff;
+  letter-spacing: -0.025em;
+  scroll-margin-top: 110px;
+}
+
+.prose h2 {
+  margin-top: 2.4em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid var(--line);
+  font-size: 1.75rem;
+}
+
+.prose h3 {
+  margin-top: 2em;
+  font-size: 1.3rem;
+}
+
+.prose p {
+  margin: 1.2em 0;
+}
+
+.prose strong {
+  color: #fff;
+}
+
+.prose a {
+  color: var(--cyan);
+}
+
+.prose blockquote {
+  margin: 1.5em 0;
+  padding: 14px 20px;
+  border-left: 3px solid var(--primary);
+  border-radius: 0 12px 12px 0;
+  background: rgba(124, 92, 255, 0.07);
+}
+
+.prose pre {
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #080a12 !important;
+}
+
+.prose code:not(pre code) {
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: #c7bfff;
+  background: rgba(124, 92, 255, 0.13);
+}
+
+.prose li {
+  margin: 0.5em 0;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+}
+
+.prose sub,
+.prose sup {
+  position: relative;
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+.prose sup {
+  vertical-align: super;
+}
+
+.prose sub {
+  vertical-align: sub;
+}
+
+.prose mark,
+.inline-mark {
+  padding: 0.04em 0.18em;
+  border-radius: 0.25em;
+  color: inherit;
+  background: linear-gradient(
+    180deg,
+    transparent 18%,
+    rgba(255, 208, 86, 0.2) 18%,
+    rgba(255, 208, 86, 0.58) 88%,
+    transparent 88%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.prose-table-scroll {
+  width: 100%;
+  margin: 1.75em 0;
+  overflow-x: auto;
+  border-radius: 14px;
+  scrollbar-color: rgba(0, 229, 255, 0.42) rgba(255, 255, 255, 0.04);
+}
+
+.prose-table-scroll:focus-visible {
+  outline: 2px solid rgba(0, 229, 255, 0.65);
+  outline-offset: 3px;
+}
+
+.prose-table-scroll table {
+  width: 100%;
+  min-width: 600px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-collapse: collapse;
+  background: rgba(7, 8, 16, 0.42);
+}
+
+.prose-table-scroll th,
+.prose-table-scroll td {
+  min-width: 130px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose-table-scroll th {
+  color: #fff;
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    rgba(124, 92, 255, 0.18),
+    rgba(0, 229, 255, 0.07)
+  );
+}
+
+.prose-table-scroll tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.prose-table-scroll tbody tr:hover {
+  background: rgba(0, 229, 255, 0.035);
+}
+
+@media (max-width: 600px) {
+  .prose {
+    border-radius: 20px;
+  }
+
+  .prose-table-scroll table {
+    min-width: 560px;
+  }
+}
