@@ -43,7 +43,6 @@ export default defineContentConfig({
       type: "page",
       source: "showcases/**/*.md",
       schema: base.extend({
-        projectPath: z.string().optional(),
         gallery,
       }),
     }),

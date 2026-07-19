@@ -23,16 +23,11 @@ const { data: projects } = await useAsyncData("home-projects", () =>
 const sortedArticles = computed(() =>
   sortArticlesByDate(articleData.value || []),
 );
-const featuredArticle = computed(
-  () =>
-    sortedArticles.value.find((article) => article.featured) ||
-    sortedArticles.value[0],
+const highlightedArticles = computed(() =>
+  sortedArticles.value.filter((article) => hasHighlightedText(article.title)),
 );
-const latestArticles = computed(() =>
-  sortedArticles.value
-    .filter((article) => article.stem !== featuredArticle.value?.stem)
-    .slice(0, 5),
-);
+const featuredArticle = computed(() => highlightedArticles.value[0]);
+const latestArticles = computed(() => highlightedArticles.value.slice(1, 6));
 const allCategoryCounts = computed(() => {
   const counts = new Map<string, number>();
   for (const article of sortedArticles.value) {

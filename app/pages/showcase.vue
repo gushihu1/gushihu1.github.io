@@ -19,6 +19,14 @@ const { data: showcaseData } = await useAsyncData("showcases", () =>
 );
 
 const showcases = computed(() => showcaseData.value ?? []);
+const { data: knowledgeNetwork } = await useKnowledgeNetwork();
+const hasKnowledgeRelation = (stem: string) => {
+  if (!knowledgeNetwork.value) return false;
+  const path = getShowcasePath(stem);
+  return knowledgeNetwork.value.relations.some(
+    (relation) => relation.source === path || relation.target === path,
+  );
+};
 </script>
 
 <template>
@@ -42,25 +50,17 @@ const showcases = computed(() => showcaseData.value ?? []);
         :delay="index * 0.04"
       >
         <section
-          :id="`showcase-${showcase.stem}`"
+          :id="getShowcaseAnchor(showcase.stem)"
           class="showcase-project glass"
         >
           <header class="showcase-project__header">
             <div>
               <span class="meta">{{
-                showcase.projectPath ? "关联作品" : "独立作品"
+                hasKnowledgeRelation(showcase.stem) ? "关联作品" : "独立作品"
               }}</span>
               <h2>{{ showcase.title }}</h2>
               <p>{{ showcase.description }}</p>
             </div>
-            <NuxtLink
-              v-if="showcase.projectPath"
-              :to="showcase.projectPath"
-              class="showcase-project__link"
-            >
-              查看关联项目
-              <UIcon name="i-lucide-arrow-up-right" />
-            </NuxtLink>
           </header>
 
           <div class="tag-list showcase-project__tags">
@@ -79,6 +79,11 @@ const showcases = computed(() => showcaseData.value ?? []);
               <span>作品说明已经开放，图片将在脱敏和整理后补充。</span>
             </div>
           </div>
+          <KnowledgeRelations
+            :network="knowledgeNetwork"
+            :current-path="getShowcasePath(showcase.stem)"
+            compact
+          />
         </section>
       </Reveal>
     </div>

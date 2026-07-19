@@ -7,24 +7,32 @@
   },
   "scripts": {
     "dev": "nuxt dev --host",
+    "prebuild": "npm run knowledge:links:check",
     "build": "nuxt build",
     "format": "prettier --write .",
+    "pregenerate": "npm run knowledge:links:check",
     "generate": "nuxt generate",
     "knowledge:import": "node scripts/import-knowledge.mjs",
     "knowledge:check": "node scripts/import-knowledge.mjs --check",
     "knowledge:help": "node scripts/import-knowledge.mjs --help",
+    "knowledge:links:check": "node scripts/check-wiki-links.mjs",
     "test:knowledge": "node scripts/knowledge-import-core.test.mjs",
+    "test:knowledge-network": "node --experimental-strip-types scripts/knowledge-network.test.mjs",
+    "test:wiki-links": "node --experimental-strip-types scripts/wiki-links.test.mjs",
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@flowershow/remark-wiki-link": "3.3.1",
     "@iconify-json/lucide": "latest",
     "@nuxt/content": "latest",
     "@nuxt/ui": "latest",
     "@tsparticles/slim": "latest",
     "@tsparticles/vue3": "latest",
     "@vueuse/nuxt": "latest",
+    "better-sqlite3": "^12.11.1",
     "echarts": "latest",
+    "github-slugger": "^2.0.0",
     "motion-v": "latest",
     "nuxt": "^4.4.8",
     "remark-mark-highlight": "^0.1.1",
@@ -34,6 +42,7 @@
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@types/node": "^24.0.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.1.8"

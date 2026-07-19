@@ -14,16 +14,7 @@ const { data: all } = await useAsyncData("project-nav", () =>
     queryCollection("projects").order("date", "DESC").all(),
   ),
 );
-const { data: relatedShowcases } = await useAsyncData(
-  `project-showcases-${route.path}`,
-  () =>
-    withContentQueryRetry(() =>
-      queryCollection("showcases")
-        .where("projectPath", "=", route.path)
-        .where("draft", "=", false)
-        .all(),
-    ),
-);
+const { data: knowledgeNetwork } = await useKnowledgeNetwork();
 const index = computed(() =>
   (all.value || []).findIndex((item) => item.path === route.path),
 );
@@ -52,27 +43,10 @@ useSeoMeta({
         </div>
       </header>
       <div class="prose glass"><ContentRenderer :value="project" /></div>
-      <section v-if="relatedShowcases?.length" class="related-showcases glass">
-        <div>
-          <span class="eyebrow"><span /> RELATED WORKS</span>
-          <h2>相关作品</h2>
-          <p>查看与这个项目关联的界面与交互成果。</p>
-        </div>
-        <div class="related-showcases__list">
-          <NuxtLink
-            v-for="showcase in relatedShowcases"
-            :key="showcase.path"
-            :to="`/showcase#showcase-${showcase.stem}`"
-            class="related-showcases__item"
-          >
-            <span>
-              <strong>{{ showcase.title }}</strong>
-              <small>{{ showcase.description }}</small>
-            </span>
-            <UIcon name="i-lucide-arrow-up-right" />
-          </NuxtLink>
-        </div>
-      </section>
+      <KnowledgeRelations
+        :network="knowledgeNetwork"
+        :current-path="route.path"
+      />
       <ContentDetailNavigation
         :previous="prev"
         :next="next"

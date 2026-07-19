@@ -41,6 +41,9 @@ export const stripHighlightedText = (value: string) =>
     .map((segment) => segment.text)
     .join("");
 
+export const hasHighlightedText = (value: string) =>
+  parseHighlightedText(value).some((segment) => segment.highlighted);
+
 export const getArticlePath = (article: ArticleRouteSource) => {
   const stem = article.stem.replace(/^\/+/, "");
   return `/${stem}`;

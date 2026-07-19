@@ -17,9 +17,11 @@ const nav = [
   { label: "文章", to: "/articles" },
   { label: "项目", to: "/projects" },
   { label: "作品", to: "/showcase" },
+  { label: "图谱", to: "/knowledge" },
   { label: "关于", to: "/about" },
 ];
 const showImport = import.meta.dev;
+const showPrivateNotes = import.meta.dev;
 const mobileOpen = ref(false);
 const isNavActive = (to: string) =>
   to === "/" ? route.path === "/" : route.path.startsWith(to);
@@ -56,6 +58,15 @@ useEventListener("keydown", (event) => {
         >
       </nav>
       <div class="header-actions">
+        <NuxtLink
+          v-if="showPrivateNotes"
+          to="/notes"
+          class="icon-button"
+          aria-label="打开个人笔记"
+          title="个人笔记"
+        >
+          <UIcon name="i-lucide-notebook-pen" />
+        </NuxtLink>
         <NuxtLink
           v-if="showImport"
           to="/admin/import"
@@ -114,6 +125,7 @@ useEventListener("keydown", (event) => {
         <NuxtLink to="/articles">文章归档</NuxtLink>
         <NuxtLink to="/projects">项目实践</NuxtLink>
         <NuxtLink to="/showcase">作品展示</NuxtLink>
+        <NuxtLink to="/knowledge">知识图谱</NuxtLink>
         <NuxtLink to="/about">关于作者</NuxtLink>
       </nav>
       <div>© {{ new Date().getFullYear() }} 刘梦涛 · Built with Nuxt</div>

@@ -39,6 +39,17 @@
   color: var(--cyan);
 }
 
+.prose a.wiki-link {
+  text-decoration-style: dotted;
+  text-underline-offset: 0.2em;
+}
+
+.prose a.wiki-link--invalid {
+  color: #ff7b88;
+  cursor: not-allowed;
+  text-decoration-color: currentColor;
+}
+
 .prose blockquote {
   margin: 1.5em 0;
   padding: 14px 20px;

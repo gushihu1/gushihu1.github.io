@@ -135,6 +135,22 @@ readingTime: 6 min
 
 文件保存后会自动获得详情路由，并进入文章搜索与标签筛选。`draft: true` 的文章不会出现在文章列表中。
 
+标题使用 `==标题==` 标记的文章会进入首页精选区域。首页按现有文章排序取第一篇作为主精选，其余最多五篇进入“文章精选”列表，不再读取文章的 `featured` 字段决定精选状态。
+
+## 个人笔记
+
+开发环境可以通过页头的个人笔记入口访问 `/notes`。个人笔记存放在 `content/private-notes`，可以直接在同一个 Obsidian Vault 中维护：
+
+```md
+---
+title: 临时想法
+---
+
+这里记录不会公开发布的内容。
+```
+
+该目录已加入 `.gitignore`，不会进入 Nuxt Content 集合、知识图谱或生产内容数据库。个人笔记页面和读取接口同时限制为开发环境及本机访问；生产环境直接访问 `/notes` 或对应接口会返回 404。
+
 ## 添加项目
 
 在 `content/projects` 新增 Markdown。除通用字段外，项目还需要：
@@ -158,14 +174,33 @@ date: 2024-01-01
 tags: [Vue 3, ECharts]
 featured: false
 draft: false
-projectPath: /projects/data-cockpit # 可选，省略后就是独立作品
 gallery:
   - src: /images/projects/data-cockpit/overview.webp
     alt: 数据驾驶舱首页
     caption: 核心指标与趋势分析
 ```
 
-`projectPath`、`caption` 都是可选字段。填写 `projectPath` 后，作品页会显示关联项目入口，项目详情也会显示相关作品；省略后作品独立展示。`src` 和 `alt` 必填，建议使用经过压缩和脱敏处理的 WebP 或 JPEG 图片。
+`caption` 是可选字段，`src` 和 `alt` 必填。建议使用经过压缩和脱敏处理的 WebP 或 JPEG 图片。作品与项目默认彼此独立，需要关联时在作品正文加入 Wiki Link。
+
+## 关联内容与知识图谱
+
+推荐直接使用 Obsidian 打开整个 `content` 目录作为 Vault，并开启 Obsidian 的“自动更新内部链接”。文章、项目和作品通过正文中的 Wiki Link 建立公开关联：
+
+```md
+[[虚拟DOM]]
+[[Vue/虚拟DOM|Vue 虚拟 DOM]]
+[[projects/data-cockpit|社区全域驾驶舱]]
+```
+
+短文件名在全 Vault 唯一时可以直接使用。不同目录存在同名文件时必须补充目录，例如两个 `promise.md` 需要写成 `[[JS/promise]]` 或 `[[代码题/promise]]`。关联只需在一侧声明，目标详情会自动显示反向引用；重复、自身、失效、歧义和指向草稿的链接不会进入公开图谱。
+
+开发环境会标记失效链接但不会中断 Nuxt Content 数据库初始化。构建和生成前会自动运行严格检查，也可以手动执行：
+
+```bash
+npm run knowledge:links:check
+```
+
+当前只支持 `[[...]]` 内容链接，不支持 `![[...]]` 附件嵌入，图片继续使用标准 Markdown。`/knowledge` 页面会展示文章、项目、作品和文章分类之间的只读关系网络；分类由 `category` 生成，标签不会自动推断内容关系。
 
 ## 修改个人信息
 

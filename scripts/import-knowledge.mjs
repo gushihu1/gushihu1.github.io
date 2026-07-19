@@ -26,6 +26,7 @@ function printHelp() {
   --folder-level <1-5>  按指定父标题自动分目录；不传时保持平铺
   --category <name>     固定文章分类
   --conflict <mode>     ask、keep、replace、keepBoth 或 error，默认 ask
+  --allow-link-changes  允许删除 Wiki Link 或移动被引用文件
   --check               只预览，不写入
   --help                显示帮助
 
@@ -58,12 +59,15 @@ function parseArgs(argv) {
     conflict: "ask",
     check: false,
     help: false,
+    allowLinkChanges: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--") continue;
     if (argument === "--check") options.check = true;
+    else if (argument === "--allow-link-changes")
+      options.allowLinkChanges = true;
     else if (argument === "--help") options.help = true;
     else if (argument === "--source")
       options.source = readValue(argv, index++, "--source");
@@ -118,6 +122,18 @@ function printPreview(preview) {
   if (preview.warningCount) console.log(`匹配警告：${preview.warningCount} 条`);
   for (const item of preview.items.filter((entry) => entry.warning)) {
     console.log(`  警告：${item.relativePath}：${item.warning}`);
+  }
+  for (const item of preview.items.filter(
+    (entry) => entry.requiresLinkConfirmation,
+  )) {
+    if (item.linkChanges.removed.length)
+      console.log(
+        `  关系变化：${item.relativePath} 将删除 ${item.linkChanges.removed.join("、")}`,
+      );
+    if (item.inboundReferences.length)
+      console.log(
+        `  被引用文件移动：${item.existingRelativePath} 被 ${item.inboundReferences.map((entry) => `${entry.file}:${entry.line}`).join("、")} 引用`,
+      );
   }
   for (const item of preview.items.filter(
     (entry) => entry.status === "conflict",
@@ -193,7 +209,9 @@ async function main() {
   }
 
   const decisions = await resolveDecisions(preview, options.conflict);
-  const result = await applyImport(input, decisions, preview.items);
+  const result = await applyImport(input, decisions, preview.items, {
+    allowLinkChanges: options.allowLinkChanges,
+  });
   const summary = result.summary;
   console.log(
     `导入完成：新增 ${summary.created}，替换 ${summary.replaced}，同时保留 ${summary.keptBoth}，保留 ${summary.kept}，改名 ${summary.renamed}，跳过 ${summary.identical}`,

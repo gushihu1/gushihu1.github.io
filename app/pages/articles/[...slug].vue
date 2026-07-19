@@ -24,6 +24,7 @@ const { data: articleData } = await useAsyncData("article-nav", () =>
       .all(),
   ),
 );
+const { data: knowledgeNetwork } = await useKnowledgeNetwork();
 const all = computed(() => sortArticlesByDate(articleData.value || []));
 const index = computed(() =>
   all.value.findIndex((item) => item.stem === articleStem.value),
@@ -79,6 +80,10 @@ useSeoMeta({
         </div>
       </header>
       <div class="prose glass"><ContentRenderer :value="article" /></div>
+      <KnowledgeRelations
+        :network="knowledgeNetwork"
+        :current-path="route.path"
+      />
       <ContentDetailNavigation
         :previous="prev"
         :next="next"

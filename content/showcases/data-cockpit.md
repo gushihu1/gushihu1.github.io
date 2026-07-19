@@ -5,7 +5,6 @@ date: 2022-08-01
 tags: [Vue3, echarts, 地图]
 featured: true
 draft: false
-projectPath: /projects/data-cockpit
 gallery:
   - src: /images/projects/data-cockpit/overview.png
     alt: 社区全域驾驶舱信息主题总览界面
@@ -14,3 +13,5 @@ gallery:
     alt: 社区全域驾驶舱教育主题界面
     caption: 教育资源、线上课程与社区地图联动展示
 ---
+
+[[projects/data-cockpit|社区全域驾驶舱]]

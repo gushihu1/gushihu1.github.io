@@ -389,3 +389,53 @@ test("多个旧文章候选只警告，不移动或删除", async () => {
     assert.equal(await exists(resolve(target, "Vue/文章.md")), true);
   });
 });
+
+test("替换删除 Wiki Link 默认阻止，显式确认后允许", async () => {
+  await withWorkspace(async ({ articlesRoot, target }) => {
+    const existing = `---\ntitle: "文章"\ncategory: "Vue"\ntags: ["Vue"]\ndraft: false\n---\n\n旧正文 [[目标]]\n`;
+    const targetNote = `---\ntitle: "目标"\ncategory: "Vue"\ntags: ["Vue"]\ndraft: false\n---\n`;
+    await writeFile(resolve(target, "文章.md"), existing, "utf8");
+    await writeFile(resolve(target, "目标.md"), targetNote, "utf8");
+    const sourceInput = input("## 文章\n\n新正文");
+    const preview = await buildImportPreview(sourceInput, { articlesRoot });
+    const item = preview.items[0];
+    assert.deepEqual(item.linkChanges.removed, ["目标"]);
+    await assert.rejects(
+      applyImport(sourceInput, { [item.id]: "replace" }, preview.items, {
+        articlesRoot,
+      }),
+      /确认关系变化/,
+    );
+    await applyImport(sourceInput, { [item.id]: "replace" }, preview.items, {
+      articlesRoot,
+      allowLinkChanges: true,
+    });
+    assert.doesNotMatch(
+      await readFile(resolve(target, "文章.md"), "utf8"),
+      /\[\[目标\]\]/,
+    );
+  });
+});
+
+test("移动被完整路径引用的文件时要求在 Obsidian 更新引用", async () => {
+  await withWorkspace(async ({ articlesRoot, target }) => {
+    const moved = `---\ntitle: "文章"\ncategory: "Vue"\ntags: ["Vue"]\ndraft: false\n---\n\n正文\n`;
+    const referring = `---\ntitle: "引用"\ncategory: "Vue"\ntags: ["Vue"]\ndraft: false\n---\n\n[[generated/旧文件]]\n`;
+    await writeFile(resolve(target, "旧文件.md"), moved, "utf8");
+    await writeFile(resolve(target, "引用.md"), referring, "utf8");
+    const sourceInput = input("## 文章\n\n正文");
+    const preview = await buildImportPreview(sourceInput, { articlesRoot });
+    const item = preview.items[0];
+    assert.equal(item.status, "rename");
+    assert.equal(item.inboundReferences[0].willBreak, true);
+    await assert.rejects(
+      applyImport(sourceInput, {}, preview.items, {
+        articlesRoot,
+        allowLinkChanges: true,
+      }),
+      /请先在 Obsidian 中完成改名/,
+    );
+    assert.equal(await exists(resolve(target, "旧文件.md")), true);
+    assert.equal(await exists(resolve(target, "文章.md")), false);
+  });
+});

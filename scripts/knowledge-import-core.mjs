@@ -16,6 +16,14 @@ import {
   resolve,
   sep,
 } from "node:path";
+import {
+  createVaultIndex,
+  resolveWikiTarget,
+  scanWikiLinks,
+  splitWikiTarget,
+  validateVault,
+  wikiLinkTargetSet,
+} from "../lib/wiki-links/core.mjs";
 
 export const ARTICLES_ROOT = resolve("content/articles");
 export const DEFAULT_TARGET_DIR = "generated";
@@ -399,11 +407,57 @@ function publicPreviewItem(item) {
     existingContent: item.existingContent,
     incomingContent: item.incomingContent,
     warning: item.warning,
+    linkChanges: item.linkChanges,
+    inboundReferences: item.inboundReferences,
+    requiresLinkConfirmation: item.requiresLinkConfirmation,
   };
 }
 
+const linkDifference = (existingContent, incomingContent) => {
+  const existing = wikiLinkTargetSet(existingContent);
+  const incoming = wikiLinkTargetSet(incomingContent);
+  return {
+    added: [...incoming].filter((target) => !existing.has(target)),
+    removed: [...existing].filter((target) => !incoming.has(target)),
+  };
+};
+
+const findInboundReferences = (index, targetRelativePath, nextRelativePath) => {
+  const target = index.notes.find(
+    (note) => note.relativePath === targetRelativePath,
+  );
+  if (!target) return [];
+  const references = [];
+  for (const source of index.notes) {
+    if (source.relativePath === target.relativePath) continue;
+    for (const link of scanWikiLinks(source.content, source.relativePath)) {
+      if (link.embed) continue;
+      const result = resolveWikiTarget(index, link.target, source.relativePath);
+      if (result.status === "resolved" && result.note === target) {
+        references.push({
+          file: source.relativePath,
+          line: link.line,
+          target: link.target,
+          willBreak: (() => {
+            const targetPath = splitWikiTarget(link.target).path.toLowerCase();
+            const nextLookup = nextRelativePath
+              .replace(/\.md$/i, "")
+              .toLowerCase();
+            return !(
+              nextLookup === targetPath || nextLookup.endsWith(`/${targetPath}`)
+            );
+          })(),
+        });
+      }
+    }
+  }
+  return references;
+};
+
 export async function buildImportPreview(input, config = {}) {
   const articlesRoot = config.articlesRoot || ARTICLES_ROOT;
+  const contentRoot = resolve(articlesRoot, "..");
+  const vaultIndex = createVaultIndex(contentRoot);
   const target = resolveTargetDirectory(input.targetDir, articlesRoot);
   const sourceDate = input.sourceDate || new Date().toISOString().slice(0, 10);
   const { articles, options } = extractKnowledge(input.sourceText, {
@@ -462,6 +516,17 @@ export async function buildImportPreview(input, config = {}) {
     const id = shortHash(
       `${relativePath}\0${article.sourceLine}\0${article.title}`,
     );
+    const linkChanges = existing
+      ? linkDifference(existing.content, incomingContent)
+      : linkDifference("", incomingContent);
+    const existingVaultPath = existing
+      ? `articles/${toPosix(relative(articlesRoot, existing.absolute))}`
+      : "";
+    const nextVaultPath = `articles/${relativePath}`;
+    const inboundReferences =
+      existing && relocated
+        ? findInboundReferences(vaultIndex, existingVaultPath, nextVaultPath)
+        : [];
     internalItems.push({
       id,
       title: article.title,
@@ -482,6 +547,10 @@ export async function buildImportPreview(input, config = {}) {
       article,
       relocated,
       warning,
+      linkChanges,
+      inboundReferences,
+      requiresLinkConfirmation:
+        linkChanges.removed.length > 0 || inboundReferences.length > 0,
     });
   }
 
@@ -586,6 +655,28 @@ export async function applyImport(
     expectedItems.length ? expectedItems : preview.items,
   );
   const target = resolveTargetDirectory(preview.targetDir, articlesRoot);
+  const protectedItems = preview._internalItems.filter((item) => {
+    if (item.status === "rename") return item.inboundReferences.length > 0;
+    if (item.status !== "conflict" || decisions[item.id] !== "replace")
+      return false;
+    return (
+      item.linkChanges.removed.length > 0 ||
+      (item.relocated && item.inboundReferences.length > 0)
+    );
+  });
+  if (protectedItems.length && !config.allowLinkChanges) {
+    throw new Error(
+      `操作会删除 Wiki Link 或移动被引用文件，请确认关系变化：${protectedItems.map((item) => item.title).join("、")}`,
+    );
+  }
+  const breakingMoves = protectedItems.filter((item) =>
+    item.inboundReferences.some((reference) => reference.willBreak),
+  );
+  if (breakingMoves.length) {
+    throw new Error(
+      `移动会产生失效 Wiki Link，请先在 Obsidian 中完成改名或更新引用：${breakingMoves.map((item) => item.title).join("、")}`,
+    );
+  }
   const reserved = new Set(
     (await readMarkdownEntries(target.absolute)).map(
       (entry) => entry.rootRelativePath,
@@ -669,6 +760,13 @@ export async function applyImport(
     }
     reserved.add(item.rootRelativePath);
     result.replaced += 1;
+  }
+  const validation = validateVault(resolve(articlesRoot, ".."));
+  if (validation.issues.length) {
+    const first = validation.issues[0];
+    throw new Error(
+      `导入后 Wiki Link 检查失败（共 ${validation.issues.length} 条）：${first.file}:${first.line} ${first.reason}`,
+    );
   }
   return { targetDir: target.relative, summary: result };
 }

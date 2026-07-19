@@ -13,5 +13,6 @@ export default defineEventHandler(async (event) => {
     body.input,
     body.decisions || {},
     body.expectedItems,
+    { allowLinkChanges: body.allowLinkChanges === true },
   );
 });

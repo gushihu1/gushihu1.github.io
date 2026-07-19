@@ -19,6 +19,14 @@ interface ImportItem {
   existingContent: string;
   incomingContent: string;
   warning: string;
+  linkChanges: { added: string[]; removed: string[] };
+  inboundReferences: Array<{
+    file: string;
+    line: number;
+    target: string;
+    willBreak: boolean;
+  }>;
+  requiresLinkConfirmation: boolean;
 }
 
 interface ImportPreview {
@@ -61,6 +69,7 @@ const decisions = reactive<Record<string, ConflictDecision>>({});
 const busy = ref(false);
 const message = ref("");
 const errorMessage = ref("");
+const allowLinkChanges = ref(false);
 
 const statusLabels: Record<ImportStatus, string> = {
   new: "新增",
@@ -74,6 +83,16 @@ const conflicts = computed(() =>
 );
 const allConflictsResolved = computed(() =>
   conflicts.value.every((item) => Boolean(decisions[item.id])),
+);
+const relationRiskItems = computed(() =>
+  (preview.value?.items || []).filter((item) => {
+    if (item.status === "rename") return item.inboundReferences.length > 0;
+    return (
+      item.status === "conflict" &&
+      decisions[item.id] === "replace" &&
+      (item.linkChanges.removed.length > 0 || item.inboundReferences.length > 0)
+    );
+  }),
 );
 const folderLevelOptions = computed(() =>
   Array.from({ length: Math.max(0, level.value - 1) }, (_, index) => index + 1),
@@ -122,6 +141,7 @@ function handleFile(event: Event) {
 
 function resetDecisions() {
   for (const key of Object.keys(decisions)) delete decisions[key];
+  allowLinkChanges.value = false;
 }
 
 async function createInputSnapshot(): Promise<ImportInput> {
@@ -198,6 +218,7 @@ async function applyChanges() {
           relativePath: item.relativePath,
           existingHash: item.existingHash,
         })),
+        allowLinkChanges: allowLinkChanges.value,
       },
     });
     const summary = result.summary;
@@ -381,6 +402,30 @@ async function applyChanges() {
 
           <p v-if="item.warning" class="item-warning">{{ item.warning }}</p>
 
+          <div
+            v-if="
+              item.linkChanges.added.length ||
+              item.linkChanges.removed.length ||
+              item.inboundReferences.length
+            "
+            class="item-warning"
+          >
+            <strong>Wiki Link 关系变化</strong>
+            <p v-if="item.linkChanges.added.length">
+              新增：{{ item.linkChanges.added.join("、") }}
+            </p>
+            <p v-if="item.linkChanges.removed.length">
+              删除：{{ item.linkChanges.removed.join("、") }}
+            </p>
+            <p v-if="item.inboundReferences.length">
+              当前文件被引用：{{
+                item.inboundReferences
+                  .map((entry) => `${entry.file}:${entry.line}`)
+                  .join("、")
+              }}
+            </p>
+          </div>
+
           <div v-if="item.status === 'conflict'" class="conflict-layout">
             <div>
               <h3>现有文件</h3>
@@ -424,9 +469,17 @@ async function applyChanges() {
             preview.targetDir === "." ? "" : `/${preview.targetDir}`
           }}</span
         >
+        <label v-if="relationRiskItems.length" class="switch-control">
+          <input v-model="allowLinkChanges" type="checkbox" />
+          <span>确认删除关系或移动被引用文件</span>
+        </label>
         <button
           class="button primary"
-          :disabled="busy || !allConflictsResolved"
+          :disabled="
+            busy ||
+            !allConflictsResolved ||
+            (relationRiskItems.length > 0 && !allowLinkChanges)
+          "
           @click="applyChanges"
         >
           {{ busy ? "正在写入..." : "确认应用" }}
