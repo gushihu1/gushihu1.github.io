@@ -6,7 +6,7 @@
     "node": ">=22.5.0"
   },
   "scripts": {
-    "dev": "nuxt dev --host",
+    "dev": "nuxt dev --host --port 3000",
     "prebuild": "npm run knowledge:links:check",
     "build": "nuxt build",
     "format": "prettier --write .",
